@@ -1,0 +1,31 @@
+# Data
+data/
+embeddings/*.npy
+embeddings/*.npz
+embeddings/*.pkl
+
+# Results
+rusults/
+results2/
+baseline/results/
+main_model/scheme3_cspdt_v2/results/
+main_model/scheme3_cspdt_v2/results_no_sem_wm/
+main_model/scheme3_cspdt_v2/results copy/
+main_model/scheme3_cspdt_v2/logs/
+main_model/scheme3_cspdt_v2/datasets/
+
+# Checkpoints
+main_model/scheme3_cspdt_v2/checkpoints/
+main_model/scheme3_cspdt_v2/checkpoints_no_sem_wm/
+*.pt
+*.pth
+
+# Temp / cache
+__pycache__/
+*.pyc
+pymp-*/
+
+# Large files
+*.pdf
+*.pkl
+other_exp/

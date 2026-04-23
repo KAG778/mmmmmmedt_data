@@ -1,0 +1,59 @@
+evaluation:
+  data_path: "/home/wangmeiyi/AuctionNet/medical/\u91CD\u6784\u4E4B\u540E\u7684\u4EE3\
+    \u7801/data/v3/test_Phys45_v3.pickle"
+  methods:
+  - random_rollout
+  - step0_rollout
+  - teacher_forcing
+  - saps2_head
+  - sigma_gate
+  use_semantic: true
+model:
+  name: td3bc
+  policy:
+    type: TD3BC
+    state_dim: 45
+    action_dim: 25
+    hidden_dim: 256
+    num_layers: 3
+    semantic_embed: null
+    gamma: 0.99
+    tau: 0.005
+    policy_noise: 0.2
+    noise_clip: 0.5
+    policy_delay: 2
+    alpha: 2.5
+  type: baseline
+  world_model:
+    type: TD3BC_World
+    state_dim: 45
+    action_dim: 25
+    hidden_dim: 256
+    num_layers: 3
+    output_heads:
+    - mu
+    - sigma
+    - saps2
+    semantic_embed: null
+training:
+  stage1:
+    batch_size: 64
+    data_path: "/home/wangmeiyi/AuctionNet/medical/\u91CD\u6784\u4E4B\u540E\u7684\u4EE3\
+      \u7801/data/v3/train_Phys45_v3.pickle"
+    epochs: 100
+    learning_rate: 0.0001
+    low_oversample: 1
+    stratified_sampling: true
+  stage2:
+    batch_size: 32
+    enabled: true
+    epochs: 50
+    learning_rate: 5.0e-05
+    selfplay_iterations: 1000
+    sigma_threshold: 1.0
+    mc_samples: 10
+    alpha_min: 0.3
+    alpha_decay_steps: 50000
+    confidence_gate: 0.5
+    lambda_O: 0.5
+    search_radius: 2
