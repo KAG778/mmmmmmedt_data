@@ -1,5 +1,6 @@
 # Data
 data/
+other_data/
 embeddings/*.npy
 embeddings/*.npz
 embeddings/*.pkl
@@ -7,25 +8,53 @@ embeddings/*.pkl
 # Results
 rusults/
 results2/
+results/
 baseline/results/
-main_model/scheme3_cspdt_v2/results/
-main_model/scheme3_cspdt_v2/results_no_sem_wm/
-main_model/scheme3_cspdt_v2/results copy/
-main_model/scheme3_cspdt_v2/logs/
-main_model/scheme3_cspdt_v2/datasets/
+baseline_Iv/results/
+baseline_III/eval_low/
+main_model*/scheme3_cspdt_v2/results*/
+main_model*/scheme3_cspdt_v2/logs/
+main_model*/scheme3_cspdt_v2/datasets/
 
-# Checkpoints
-main_model/scheme3_cspdt_v2/checkpoints/
-main_model/scheme3_cspdt_v2/checkpoints_no_sem_wm/
+# Checkpoints & model weights
+main_model*/scheme3_cspdt_v2/checkpoints*/
 *.pt
 *.pth
+*.ckpt
+
+# Logs
+logs/
+**/logs*/
+*.log
+
+# Archives
+*.rar
+*.zip
+*.tar
+*.tar.gz
+*.whl
+*.deb
 
 # Temp / cache
+.env
+.env.local
+.env.*
 __pycache__/
 *.pyc
 pymp-*/
+*.egg-info/
 
 # Large files
 *.pdf
 *.pkl
+*.npy
+*.npz
 other_exp/
+
+# Claude / planning
+.claude/
+.planning/
+
+# OS
+.DS_Store
+Thumbs.db

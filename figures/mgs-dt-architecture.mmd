@@ -1,0 +1,76 @@
+flowchart LR
+    subgraph S2L["Structured-to-Language Verbalization"]
+        direction TB
+        EHR["EHR State<br/>s_t ∈ R^45"]
+        EHR --> Classifier["Clinical Threshold<br/>Classifiers"]
+        Classifier --> ProfText["Profile Text<br/>Patient severity,<br/>organ burden"]
+        Classifier --> CtxText["Context Text<br/>Vital/lab trends,<br/>treatment history"]
+        Classifier --> AdvText["Advisory Text<br/>Abnormalities,<br/>risk focus"]
+        ProfText --> Qwen["Qwen2.5-0.5B<br/>Text Encoder"]
+        CtxText --> Qwen
+        AdvText --> Qwen
+        Qwen --> ProfEmb["e_prof ∈ R^896"]
+        Qwen --> CtxEmb["e_ctx ∈ R^896"]
+        Qwen --> AdvEmb["e_adv ∈ R^896"]
+    end
+
+    subgraph MGS_DT["Multi-Granular Semantic Decision Transformer (π)"]
+        direction TB
+        ProfEmb --> ProfProj["Linear→128"]
+        CtxEmb --> CtxProj["Linear→128"]
+        AdvEmb --> AdvProj["Linear→128"]
+        RTG["RTG_t"] --> RTGProj["Linear→128"]
+        State["s_t ∈ R^45"] --> StateProj["Linear→128"]
+        Act["a_{t-1}"] --> ActEmb["Embed→128"]
+
+        ProfProj --> Seq["Token Sequence<br/>[Prof, RTG, Ctx, Adv, State, Action] × T"]
+        RTGProj --> Seq
+        CtxProj --> Seq
+        AdvProj --> Seq
+        StateProj --> Seq
+        ActEmb --> Seq
+
+        Seq --> PosEmb["+ Position Embedding"]
+        PosEmb --> Transformer["Causal Transformer<br/>4 layers × 8 heads"]
+        Transformer --> Logits["Action Logits<br/>π(a_t | ·)"]
+    end
+
+    subgraph SP["State Predictor (Ω)"]
+        direction TB
+        State2["s_t"] --> Concat["Concat"]
+        Act2["a_t (one-hot)"] --> Concat
+        Concat --> MLP_SP["3-layer MLP<br/>256 hidden"]
+        MLP_SP --> Mu["μ ∈ R^45"]
+        MLP_SP --> Sigma["σ ∈ R^45"]
+        MLP_SP --> Delta["ΔSAPS2"]
+    end
+
+    subgraph CF["Counterfactual Self-Play"]
+        direction TB
+        Logits --> ActionSearch["Action Search<br/>±2 neighborhood"]
+        Mu --> Confidence["Confidence Filter<br/>σ < threshold"]
+        Sigma --> Confidence
+        Delta --> SelectBest["Select Best<br/>min predicted ΔSAPS2"]
+        Confidence --> SelectBest
+        ActionSearch --> SelectBest
+        SelectBest --> Advantage["advantage > 0?"]
+        Advantage -->|Yes| PolicyUpdate["Policy Update<br/>+ SP Semi-Bootstrap"]
+        Advantage -->|No| Skip["Skip"]
+    end
+
+    S2L --> MGS_DT
+    MGS_DT --> SP
+    MGS_DT --> CF
+    SP --> CF
+
+    classDef input fill:#10B981,stroke:#059669,color:#fff
+    classDef encoder fill:#2563EB,stroke:#1D4ED8,color:#fff
+    classDef fusion fill:#7C3AED,stroke:#6D28D9,color:#fff
+    classDef output fill:#EA580C,stroke:#C2410C,color:#fff
+    classDef module fill:#F59E0B,stroke:#D97706,color:#fff
+
+    class EHR,RTG,State,Act,State2,Act2 input
+    class Qwen,Transformer,MLP_SP encoder
+    class Seq,PosEmb,Concat fusion
+    class Logits,Mu,Sigma,Delta output
+    class ProfText,CtxText,AdvText,Classifier,ActionSearch,Confidence,SelectBest module
